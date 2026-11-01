@@ -1,0 +1,34 @@
+{
+  "name": "focuswitness",
+  "version": "0.1.0",
+  "private": true,
+  "description": "P007 焦证仪 FocusWitness — 双焦面像差反演与局部可辨识性实验室",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:math": "vitest run tests/math tests/oracle",
+    "test:contracts": "vitest run tests/contracts",
+    "test:worker": "vitest run tests/worker",
+    "test:ui": "vitest run tests/ui",
+    "build": "vite build",
+    "serve": "node tools/serve.mjs",
+    "verify": "npm run typecheck && npm run test && npm run build",
+    "release": "node tools/release.mjs",
+    "verify:archive": "node tools/check-archive.mjs"
+  },
+  "dependencies": {
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.2",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "5.2.0",
+    "typescript": "5.9.3",
+    "vite": "8.3.5",
+    "vitest": "4.1.12"
+  }
+}

@@ -1,0 +1,772 @@
+/**
+ * P007 FocusWitness — Application Stylesheet
+ * Specifications: PROJECT_BOOK.md Section 4.1, 4.2, 5.1, FR01, FR02, FR13
+ * 
+ * Rules:
+ * - Pure local CSS, no external CDNs/remote fonts
+ * - Responsive layout: 3-column desktop (>= 1200px), stacked column on narrow screens
+ * - Visible focus rings for keyboard navigation (:focus-visible)
+ * - Diverging color scale indicators with explicit +/- signs (FR13)
+ */
+
+:root {
+  /* Colors */
+  --fw-bg: #0b0f17;
+  --fw-surface: #121824;
+  --fw-surface-card: #182234;
+  --fw-surface-hover: #223048;
+  --fw-surface-inset: #0d131f;
+
+  --fw-border: #2a3850;
+  --fw-border-subtle: #1c273a;
+  --fw-border-focus: #38bdf8;
+
+  --fw-text-main: #f1f5f9;
+  --fw-text-muted: #94a3b8;
+  --fw-text-subtle: #64748b;
+  --fw-text-inverse: #0b0f17;
+
+  /* Accent & Action colors */
+  --fw-primary: #38bdf8;
+  --fw-primary-hover: #7dd3fc;
+  --fw-primary-bg: rgba(56, 189, 248, 0.12);
+  --fw-primary-border: rgba(56, 189, 248, 0.35);
+
+  --fw-accent: #818cf8;
+  --fw-accent-hover: #a5b4fc;
+
+  /* Status Colors */
+  --fw-status-idle: #94a3b8;
+  --fw-status-ready: #38bdf8;
+  --fw-status-stale: #fbbf24;
+  --fw-status-running: #60a5fa;
+  --fw-status-converged: #34d399;
+  --fw-status-max-iter: #fb923c;
+  --fw-status-stalled: #f87171;
+  --fw-status-cancelled: #f43f5e;
+  --fw-status-error: #ef4444;
+
+  /* Diverging colormap for residuals (FR13) */
+  --fw-res-neg: #0284c7;     /* Sky/Blue: negative residual (Obs < Reproj) */
+  --fw-res-neg-bg: #082f49;
+  --fw-res-zero: #334155;    /* Neutral dark */
+  --fw-res-pos: #e11d48;     /* Rose/Crimson: positive residual (Obs > Reproj) */
+  --fw-res-pos-bg: #4c0519;
+
+  /* Spacing & Radii */
+  --fw-radius-sm: 4px;
+  --fw-radius-md: 6px;
+  --fw-radius-lg: 10px;
+  --fw-radius-pill: 9999px;
+
+  --fw-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --fw-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+
+  /* Fonts */
+  --fw-font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fw-font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+/* Base reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--fw-bg);
+  color: var(--fw-text-main);
+  font-family: var(--fw-font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Accessibility: High-contrast focus rings */
+:focus-visible {
+  outline: 2px solid var(--fw-border-focus);
+  outline-offset: 2px;
+}
+
+/* Screen-reader utility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* App container */
+.fw-app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--fw-bg);
+  color: var(--fw-text-main);
+}
+
+/* Header */
+.fw-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 20px;
+  background-color: var(--fw-surface);
+  border-bottom: 1px solid var(--fw-border);
+  box-shadow: var(--fw-shadow-sm);
+}
+
+.fw-header-title-group {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.fw-header-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--fw-text-main);
+  white-space: nowrap;
+}
+
+.fw-header-subtitle {
+  font-size: 0.82rem;
+  color: var(--fw-text-muted);
+  white-space: nowrap;
+}
+
+.fw-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.fw-header-status-area {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Layout Columns: Section 4.1 Desktop Blueprint (>= 1200px) */
+.fw-layout {
+  display: grid;
+  grid-template-columns: 320px minmax(460px, 1fr) 340px;
+  gap: 16px;
+  padding: 16px;
+  flex: 1;
+  max-width: 1800px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.fw-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0; /* Prevents flex/grid overflow */
+}
+
+/* Responsive Narrow Screen layout (FR13, Section 4.2) */
+@media (max-width: 1199px) {
+  .fw-layout {
+    grid-template-columns: 1fr;
+    padding: 12px;
+  }
+
+  .fw-col-left {
+    order: 1; /* 1. Configuration & controls */
+  }
+
+  .fw-col-center {
+    order: 2; /* 2. Evidence images matrix */
+  }
+
+  .fw-col-right {
+    order: 3; /* 3. Analysis and Inversion */
+  }
+
+  .fw-header {
+    padding: 10px 14px;
+  }
+}
+
+/* Cards & Panels */
+.fw-panel {
+  background-color: var(--fw-surface);
+  border: 1px solid var(--fw-border);
+  border-radius: var(--fw-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--fw-shadow-sm);
+  display: flex;
+  flex-direction: column;
+}
+
+.fw-panel-header {
+  padding: 10px 14px;
+  background-color: var(--fw-surface-inset);
+  border-bottom: 1px solid var(--fw-border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.fw-panel-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--fw-text-main);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.fw-panel-badge {
+  font-size: 0.72rem;
+  padding: 2px 6px;
+  border-radius: var(--fw-radius-sm);
+  background-color: var(--fw-surface-card);
+  color: var(--fw-text-muted);
+  border: 1px solid var(--fw-border);
+}
+
+.fw-panel-body {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.fw-panel-footer {
+  padding: 8px 14px;
+  background-color: var(--fw-surface-inset);
+  border-top: 1px solid var(--fw-border-subtle);
+  font-size: 0.75rem;
+  color: var(--fw-text-muted);
+}
+
+/* Button System */
+.fw-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 0.84rem;
+  font-weight: 500;
+  border-radius: var(--fw-radius-md);
+  border: 1px solid var(--fw-border);
+  background-color: var(--fw-surface-card);
+  color: var(--fw-text-main);
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.fw-btn:hover:not(:disabled) {
+  background-color: var(--fw-surface-hover);
+  border-color: var(--fw-text-muted);
+}
+
+.fw-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.fw-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.fw-btn-primary {
+  background-color: var(--fw-primary);
+  border-color: var(--fw-primary);
+  color: var(--fw-text-inverse);
+  font-weight: 600;
+}
+
+.fw-btn-primary:hover:not(:disabled) {
+  background-color: var(--fw-primary-hover);
+  border-color: var(--fw-primary-hover);
+  color: var(--fw-text-inverse);
+}
+
+.fw-btn-danger {
+  background-color: rgba(244, 63, 94, 0.12);
+  border-color: rgba(244, 63, 94, 0.4);
+  color: var(--fw-status-cancelled);
+}
+
+.fw-btn-danger:hover:not(:disabled) {
+  background-color: rgba(244, 63, 94, 0.25);
+  border-color: var(--fw-status-cancelled);
+}
+
+.fw-btn-sm {
+  padding: 3px 8px;
+  font-size: 0.75rem;
+}
+
+/* Status Badge Component */
+.fw-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--fw-radius-pill);
+  font-size: 0.78rem;
+  font-weight: 600;
+  border: 1px solid currentColor;
+  white-space: nowrap;
+}
+
+.fw-status-badge-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+.fw-status-idle {
+  color: var(--fw-status-idle);
+  background-color: rgba(148, 163, 184, 0.1);
+  border-color: rgba(148, 163, 184, 0.3);
+}
+
+.fw-status-ready {
+  color: var(--fw-status-ready);
+  background-color: rgba(56, 189, 248, 0.1);
+  border-color: rgba(56, 189, 248, 0.3);
+}
+
+.fw-status-stale {
+  color: var(--fw-status-stale);
+  background-color: rgba(251, 191, 36, 0.12);
+  border-color: rgba(251, 191, 36, 0.4);
+}
+
+.fw-status-running {
+  color: var(--fw-status-running);
+  background-color: rgba(96, 165, 250, 0.15);
+  border-color: rgba(96, 165, 250, 0.4);
+}
+
+.fw-status-running .fw-status-badge-dot {
+  animation: fw-pulse 1.2s infinite ease-in-out;
+}
+
+.fw-status-converged {
+  color: var(--fw-status-converged);
+  background-color: rgba(52, 211, 153, 0.12);
+  border-color: rgba(52, 211, 153, 0.35);
+}
+
+.fw-status-cancelled {
+  color: var(--fw-status-cancelled);
+  background-color: rgba(244, 63, 94, 0.12);
+  border-color: rgba(244, 63, 94, 0.35);
+}
+
+.fw-status-error {
+  color: var(--fw-status-error);
+  background-color: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+@keyframes fw-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.7); }
+}
+
+/* Controls Form Elements */
+.fw-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fw-field-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--fw-text-main);
+}
+
+.fw-field-desc {
+  font-size: 0.74rem;
+  color: var(--fw-text-muted);
+}
+
+.fw-select {
+  padding: 6px 10px;
+  background-color: var(--fw-surface-card);
+  border: 1px solid var(--fw-border);
+  border-radius: var(--fw-radius-md);
+  color: var(--fw-text-main);
+  font-size: 0.84rem;
+  cursor: pointer;
+  width: 100%;
+}
+
+.fw-select:hover {
+  border-color: var(--fw-text-muted);
+}
+
+/* Mode pill selector */
+.fw-pill-group {
+  display: inline-flex;
+  padding: 3px;
+  background-color: var(--fw-surface-inset);
+  border: 1px solid var(--fw-border);
+  border-radius: var(--fw-radius-md);
+  gap: 3px;
+}
+
+.fw-pill-btn {
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  border-radius: var(--fw-radius-sm);
+  background: transparent;
+  border: none;
+  color: var(--fw-text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.fw-pill-btn:hover {
+  color: var(--fw-text-main);
+}
+
+.fw-pill-btn[aria-checked="true"],
+.fw-pill-btn.active {
+  background-color: var(--fw-primary);
+  color: var(--fw-text-inverse);
+  font-weight: 600;
+}
+
+/* Slider with precision input */
+.fw-slider-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.fw-slider {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--fw-surface-inset);
+  border: 1px solid var(--fw-border);
+  outline: none;
+}
+
+.fw-slider::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--fw-primary);
+  cursor: pointer;
+  border: 2px solid var(--fw-surface);
+  box-shadow: 0 0 4px rgba(0,0,0,0.5);
+}
+
+.fw-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--fw-primary);
+  cursor: pointer;
+  border: 2px solid var(--fw-surface);
+  box-shadow: 0 0 4px rgba(0,0,0,0.5);
+}
+
+.fw-num-input {
+  width: 78px;
+  padding: 4px 6px;
+  font-family: var(--fw-font-mono);
+  font-size: 0.8rem;
+  background-color: var(--fw-surface-inset);
+  border: 1px solid var(--fw-border);
+  border-radius: var(--fw-radius-sm);
+  color: var(--fw-text-main);
+  text-align: right;
+}
+
+.fw-num-input:focus {
+  border-color: var(--fw-primary);
+}
+
+/* Switch / Toggle Component */
+.fw-switch-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 0.82rem;
+}
+
+.fw-switch {
+  position: relative;
+  display: inline-block;
+  width: 38px;
+  height: 20px;
+}
+
+.fw-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.fw-switch-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--fw-surface-inset);
+  border: 1px solid var(--fw-border);
+  transition: 0.2s;
+  border-radius: 20px;
+}
+
+.fw-switch-slider:before {
+  position: absolute;
+  content: "";
+  height: 14px;
+  width: 14px;
+  left: 2px;
+  bottom: 2px;
+  background-color: var(--fw-text-muted);
+  transition: 0.2s;
+  border-radius: 50%;
+}
+
+.fw-switch input:checked + .fw-switch-slider {
+  background-color: var(--fw-primary);
+  border-color: var(--fw-primary);
+}
+
+.fw-switch input:checked + .fw-switch-slider:before {
+  transform: translateX(18px);
+  background-color: var(--fw-text-inverse);
+}
+
+/* Banner / Info box */
+.fw-info-box {
+  padding: 8px 12px;
+  border-radius: var(--fw-radius-md);
+  font-size: 0.78rem;
+  line-height: 1.45;
+  border: 1px solid var(--fw-border);
+  background-color: var(--fw-surface-inset);
+}
+
+.fw-info-box-stale {
+  border-color: rgba(251, 191, 36, 0.35);
+  background-color: rgba(251, 191, 36, 0.08);
+  color: #fde68a;
+}
+
+.fw-info-box-blind {
+  border-color: rgba(56, 189, 248, 0.35);
+  background-color: rgba(56, 189, 248, 0.06);
+  color: #bae6fd;
+}
+
+/* Metrics Legend & FR13 Residual Scale */
+.fw-legend-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+}
+
+.fw-legend-table th,
+.fw-legend-table td {
+  padding: 6px 8px;
+  text-align: left;
+  border-bottom: 1px solid var(--fw-border-subtle);
+}
+
+.fw-legend-table th {
+  color: var(--fw-text-muted);
+  font-weight: 500;
+}
+
+.fw-legend-table td:last-child {
+  font-family: var(--fw-font-mono);
+}
+
+/* FR13 Diverging Residual Scale with explicit sign annotations */
+.fw-res-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  background-color: var(--fw-surface-inset);
+  border: 1px solid var(--fw-border-subtle);
+  border-radius: var(--fw-radius-md);
+}
+
+.fw-res-scale-bar {
+  height: 12px;
+  border-radius: var(--fw-radius-sm);
+  background: linear-gradient(
+    to right,
+    var(--fw-res-neg) 0%,
+    var(--fw-res-zero) 50%,
+    var(--fw-res-pos) 100%
+  );
+  border: 1px solid var(--fw-border);
+}
+
+.fw-res-scale-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  font-family: var(--fw-font-mono);
+}
+
+.fw-res-tag-neg {
+  color: #38bdf8;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.fw-res-tag-zero {
+  color: var(--fw-text-muted);
+}
+
+.fw-res-tag-pos {
+  color: #fb7185;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* Evidence Matrix Placeholder (Middle Column Section 4.1) */
+.fw-matrix-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.fw-matrix-cell {
+  background-color: var(--fw-surface-card);
+  border: 1px solid var(--fw-border-subtle);
+  border-radius: var(--fw-radius-md);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fw-matrix-cell-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--fw-text-muted);
+}
+
+.fw-matrix-cell-content {
+  aspect-ratio: 1;
+  background-color: var(--fw-surface-inset);
+  border-radius: var(--fw-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed var(--fw-border-subtle);
+  color: var(--fw-text-subtle);
+  font-size: 0.78rem;
+  text-align: center;
+  padding: 8px;
+}
+
+/* Inversion Estimates Table */
+.fw-est-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.fw-est-table th,
+.fw-est-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--fw-border-subtle);
+}
+
+.fw-est-table th {
+  color: var(--fw-text-muted);
+  font-weight: 500;
+  text-align: left;
+}
+
+.fw-est-table td:nth-child(2),
+.fw-est-table td:nth-child(3) {
+  font-family: var(--fw-font-mono);
+  text-align: right;
+}
+
+/* EvidencePanel Light Surface Typography Overrides (TASK-P007-FIX-R1-B002) */
+.fw-evidence-panel .fw-est-table,
+.fw-evidence-panel .fw-evidence-table {
+  color: #212529;
+  background-color: #ffffff;
+}
+
+.fw-evidence-panel .fw-est-table th,
+.fw-evidence-panel .fw-evidence-table th {
+  color: #212529;
+  font-weight: 600;
+}
+
+.fw-evidence-panel .fw-est-table td,
+.fw-evidence-panel .fw-evidence-table td {
+  color: #212529;
+}
+
+/* Footer (Section 4.1 bottom area) */
+.fw-footer {
+  background-color: var(--fw-surface);
+  border-top: 1px solid var(--fw-border);
+  padding: 12px 20px;
+  font-size: 0.76rem;
+  color: var(--fw-text-muted);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
+.fw-footer-notes {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
